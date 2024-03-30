@@ -1,1 +1,3 @@
-code rust	true
+say hi again	true
+say hi	true
+make me happy	true
