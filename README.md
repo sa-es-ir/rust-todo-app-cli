@@ -1,1 +1,1 @@
-# rust-todo-app-cli
+# ToDo App by CommandLine (cli) in Rust
