@@ -11,19 +11,19 @@ fn main() {
     //     map: HashMap::new(),
     // };
 
-    let mut todo = Todo::new_loop().expect("Initialisation of db failed");
+    let mut todo = Todo::new_json().expect("Initialisation of db failed");
 
     if action == "add" {
         todo.insert(item);
 
-        match todo.save() {
+        match todo.save_json() {
             Ok(_) => println!("item saved!"),
             Err(error) => println!("An error occured: {}", error),
         }
     } else if action == "complete" {
         match todo.complete(&item) {
             None => println!("'{}' is not present in the list", item),
-            Some(_) => match todo.save() {
+            Some(_) => match todo.save_json() {
                 Ok(_) => println!("todo saved"),
                 Err(why) => println!("An error occurred: {}", why),
             },
@@ -63,6 +63,21 @@ impl Todo {
         Ok(Todo { map })
     }
 
+    fn new_json() -> Result<Todo, std::io::Error> {
+        let file_reader = std::fs::OpenOptions::new()
+            .write(true)
+            .read(true)
+            .create(true)
+            .open("db.json")?;
+
+        match serde_json::from_reader(file_reader) {
+            Ok(map) => Ok(Todo { map }),
+            Err(e) if e.is_eof() => Ok(Todo {
+                map: HashMap::new(),
+            }),
+            Err(e) => panic!("an error occured: {}", e),
+        }
+    }
     fn new_loop() -> Result<Todo, std::io::Error> {
         // open the db file
         let mut f = std::fs::OpenOptions::new()
@@ -104,5 +119,16 @@ impl Todo {
         }
 
         std::fs::write("db.txt", content)
+    }
+
+    fn save_json(self) -> Result<(), Box<dyn std::error::Error>> {
+        let f = std::fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open("db.json")?;
+
+        let _ = serde_json::to_writer_pretty(f, &self.map);
+
+        Ok(())
     }
 }
