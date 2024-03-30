@@ -20,6 +20,14 @@ fn main() {
             Ok(_) => println!("item saved!"),
             Err(error) => println!("An error occured: {}", error),
         }
+    } else if action == "complete" {
+        match todo.complete(&item) {
+            None => println!("'{}' is not present in the list", item),
+            Some(_) => match todo.save() {
+                Ok(_) => println!("todo saved"),
+                Err(why) => println!("An error occurred: {}", why),
+            },
+        }
     }
 }
 
@@ -28,6 +36,13 @@ struct Todo {
 }
 
 impl Todo {
+    fn complete(&mut self, key: &String) -> Option<()> {
+        match self.map.get_mut(key) {
+            Some(v) => Some(*v = false),
+            None => None,
+        }
+    }
+
     fn new() -> Result<Todo, std::io::Error> {
         let mut file_options = std::fs::OpenOptions::new()
             .write(true)

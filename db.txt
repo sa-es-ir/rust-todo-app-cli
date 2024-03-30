@@ -1,3 +1,2 @@
-say hi again	true
-say hi	true
 make me happy	true
+make a coffe	true
